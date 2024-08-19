@@ -1,0 +1,25 @@
+on: push
+
+jobs:
+  fetch_secret:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+  steps:
+      - id: fetch-secret
+       uses: akeyless-community/akeyless-github-action@v1.1.1
+       with:
+         access-id: ${{ vars.AKEYLESS_ACCESS_ID }}
+         access-type: jwt
+         dynamic-secrets: |
+           - name: /dmathis/aws-dynamic-dmathis-hw2
+             output-name: aws
+       
+        - run: sudo snap install --classic aws-cli
+             
+        - run: aws sts get-caller-identity
+          env:
+            AWS_REGION: us-east-2
+            AWS_ACCESS_KEY_ID: ${{ fromJSON(steps.fetch-secret.outputs.aws).access_key_id }}
+            AWS_SECRET_ACCESS_KEY: ${{ fromJSON(steps.fetch-secret.outputs.aws).secret_access_key }}
